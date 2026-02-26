@@ -1,0 +1,74 @@
+DROP DATABASE CompanyDB;
+CREATE DATABASE CompanyDB;
+USE CompanyDB;
+
+CREATE TABLE COUNTRY (
+    CountryId INT PRIMARY KEY,
+    CountryName VARCHAR(100) NOT NULL UNIQUE,
+    Continent VARCHAR(100) NOT NULL,
+    Currency VARCHAR(50) NOT NULL
+);
+
+INSERT INTO COUNTRY VALUES
+(1,'Bangladesh','Asia','Taka'),
+(2,'USA','North America','Dollar'),
+(3,'UK','Europe','Pound'),
+(4,'Canada','North America','Canadian Dollar'),
+(5,'Japan','Asia','Yen');
+
+
+CREATE TABLE DEPARTMENT (
+    DepartmentId INT PRIMARY KEY,
+    DeptName VARCHAR(100) NOT NULL,
+    CountryId INT NOT NULL,
+    
+    FOREIGN KEY (CountryId)
+    REFERENCES COUNTRY(CountryId)
+);
+INSERT INTO DEPARTMENT VALUES
+(101,'HR',1),
+(102,'IT',2),
+(103,'Finance',3),
+(104,'Marketing',4),
+(105,'Research',5);
+
+CREATE TABLE EMPLOYEE (
+    EmpId INT PRIMARY KEY,
+    EmpName VARCHAR(100) NOT NULL,
+    DeptId INT NOT NULL, 
+    FOREIGN KEY (DeptId)
+    REFERENCES DEPARTMENT(DepartmentId)
+);
+
+INSERT INTO EMPLOYEE VALUES
+(1001,'Rahim',101),
+(1002,'John',102),
+(1003,'David',103),
+(1004,'Sophia',104),
+(1005,'Tanaka',105);
+
+
+CREATE TABLE FOLDER (
+    FolderId INT PRIMARY KEY,
+    EmpId INT NOT NULL,
+    AccessType ENUM('Read','Write','Admin') NOT NULL,  
+    FOREIGN KEY (EmpId)
+    REFERENCES EMPLOYEE(EmpId)
+);
+
+INSERT INTO FOLDER VALUES
+(1,1001,'Read'),
+(2,1002,'Write'),
+(3,1003,'Admin'),
+(4,1004,'Read'),
+(5,1005,'Write');
+
+DESCRIBE COUNTRY;
+DESCRIBE DEPARTMENT;
+DESCRIBE EMPLOYEE;
+DESCRIBE FOLDER;
+
+SELECT * FROM COUNTRY;
+SELECT * FROM DEPARTMENT;
+SELECT * FROM EMPLOYEE;
+SELECT * FROM FOLDER;
