@@ -1,0 +1,90 @@
+CREATE DATABASE library_lab;
+USE library_lab;
+
+CREATE TABLE MEMBER(
+    MemberID INT,
+    FullName VARCHAR(50) NOT NULL,
+    Email VARCHAR(50) NOT NULL,
+    Age INT,
+    Gender ENUM('Male','Female'),
+
+    CONSTRAINT pk_member PRIMARY KEY(MemberID),
+    CONSTRAINT uq_member_email UNIQUE(Email),
+    CONSTRAINT chk_member_age CHECK(Age >= 12)
+);
+
+INSERT INTO MEMBER VALUES
+(1,'Joy Hasan','joy@gmail.com',20,'Male'),
+(2,' Hasan','hasan@gmail.com',22,'Male'),
+(3,'Maria','maria@gmail.com',19,'Female'),
+(4,'Sadia ','sadia@gmail.com',25,'Female'),
+(5,'Tanvir','tanvir@gmail.com',18,'Male');
+
+CREATE TABLE BOOK(
+    BookID INT,
+    Title VARCHAR(100) NOT NULL,
+    ISBN VARCHAR(20) NOT NULL,
+    Price DECIMAL(6,2),
+    Status ENUM('AVAILABLE','BORROWED') DEFAULT 'AVAILABLE',
+
+    CONSTRAINT pk_book PRIMARY KEY(BookID),
+    CONSTRAINT uq_book_isbn UNIQUE(ISBN),
+    CONSTRAINT chk_book_price CHECK(Price >= 0)
+);
+
+INSERT INTO BOOK VALUES
+(101,'Database Systems','ISBN001',500,'AVAILABLE'),
+(102,'Data Structures','ISBN002',450,'AVAILABLE'),
+(103,'Operating System','ISBN003',600,'AVAILABLE'),
+(104,'Computer Networks','ISBN004',550,'AVAILABLE'),
+(105,'Software Engineering','ISBN005',700,'AVAILABLE');
+
+
+CREATE TABLE LOAN(
+    LoanID INT,
+    MemberID INT,
+    BookID INT,
+
+    CONSTRAINT pk_loan PRIMARY KEY(LoanID),
+
+    CONSTRAINT fk_member
+    FOREIGN KEY(MemberID)
+    REFERENCES MEMBER(MemberID),
+
+    CONSTRAINT fk_book
+    FOREIGN KEY(BookID)
+    REFERENCES BOOK(BookID)
+);
+INSERT INTO LOAN VALUES
+(1,1,101),
+(2,2,102),
+(3,3,103),
+(4,1,104),
+(5,4,105),
+(6,5,101);
+
+INSERT INTO MEMBER VALUES
+(6,'Test User','rahim@gmail.com',21,'Male');
+
+INSERT INTO LOAN VALUES
+(7,99,102);
+
+INSERT INTO BOOK VALUES
+(106,'AI Book','ISBN006',-200,'AVAILABLE');
+
+ALTER TABLE MEMBER
+ADD Phone VARCHAR(15) NOT NULL DEFAULT 'N/A';
+
+ALTER TABLE BOOK
+MODIFY Price DECIMAL(8,2);
+
+ALTER TABLE BOOK
+CHANGE Status Availability ENUM('AVAILABLE','BORROWED') DEFAULT 'AVAILABLE';
+
+ALTER TABLE MEMBER
+DROP COLUMN Gender;
+
+ALTER TABLE MEMBER
+ADD CONSTRAINT chk_phone CHECK(Phone <> '');
+
+RENAME TABLE LOAN TO BORROW;
