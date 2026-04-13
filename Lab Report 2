@@ -1,0 +1,132 @@
+-- Create Database
+CREATE DATABASE library_query_lab;
+USE library_query_lab;
+
+-- Create Tables
+
+CREATE TABLE MEMBER (
+    MemberID INT PRIMARY KEY,
+    FullName VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Age INT CHECK (Age >= 12),
+    Phone VARCHAR(15) NOT NULL DEFAULT 'N/A'
+);
+
+CREATE TABLE BOOK (
+    BookID INT PRIMARY KEY,
+    Title VARCHAR(150) NOT NULL,
+    ISBN VARCHAR(50) NOT NULL UNIQUE,
+    Price DECIMAL(8,2) CHECK (Price >= 0),
+    Availability ENUM('AVAILABLE','BORROWED') DEFAULT 'AVAILABLE'
+);
+
+CREATE TABLE BORROW (
+    BorrowID INT PRIMARY KEY,
+    MemberID INT,
+    BookID INT,
+    BorrowDate DATE NOT NULL,
+    FOREIGN KEY (MemberID) REFERENCES MEMBER(MemberID),
+    FOREIGN KEY (BookID) REFERENCES BOOK(BookID)
+);
+
+-- Insert Data
+
+INSERT INTO MEMBER VALUES
+(1,'Amin Khan','amin@gmail.com',25,'01711111111'),
+(2,'Rahim Uddin','rahim@gmail.com',17,'N/A'),
+(3,'Karim Hasan','karim@gmail.com',22,'01822222222'),
+(4,'Anika Rahman','anika@gmail.com',19,'01933333333'),
+(5,'Sohan','sohan@gmail.com',15,'N/A'),
+(6,'Arman Hossain','arman@gmail.com',30,'01644444444'),
+(7,'Nusrat Jahan','nusrat@gmail.com',21,'01755555555'),
+(8,'Hasan','hasan@gmail.com',18,'N/A');
+
+INSERT INTO BOOK VALUES
+(1,'Database Systems','ISBN001',1500,'AVAILABLE'),
+(2,'Data Structures','ISBN002',1200,'BORROWED'),
+(3,'Operating System','ISBN003',800,'AVAILABLE'),
+(4,'Computer Networks','ISBN004',2000,'BORROWED'),
+(5,'Artificial Intelligence','ISBN005',2500,'AVAILABLE'),
+(6,'Machine Learning','ISBN006',1800,'AVAILABLE'),
+(7,'Data Science','ISBN007',1600,'BORROWED'),
+(8,'Software Engineering','ISBN008',900,'AVAILABLE');
+
+INSERT INTO BORROW VALUES
+(1,1,2,'2024-01-01'),
+(2,2,1,'2024-01-05'),
+(3,3,4,'2024-01-07'),
+(4,4,3,'2024-01-10'),
+(5,5,5,'2024-01-12'),
+(6,6,6,'2024-01-15'),
+(7,7,7,'2024-01-18'),
+(8,8,8,'2024-01-20'),
+(9,1,3,'2024-01-22'),
+(10,3,2,'2024-01-25');
+
+-- Queries
+
+-- Show all records
+SELECT * FROM MEMBER;
+SELECT * FROM BOOK;
+SELECT * FROM BORROW;
+
+-- Distinct Availability
+SELECT DISTINCT Availability FROM BOOK;
+
+-- Members Age >= 18
+SELECT * FROM MEMBER WHERE Age >= 18;
+
+-- Books Price Between 500 and 2000
+SELECT * FROM BOOK WHERE Price BETWEEN 500 AND 2000;
+
+-- Books Availability IN
+SELECT * FROM BOOK 
+WHERE Availability IN ('AVAILABLE','BORROWED');
+
+-- Members Name starts with 'A' or ends with 'n'
+SELECT * FROM MEMBER 
+WHERE FullName LIKE 'A%' OR FullName LIKE '%n';
+
+-- Members Phone not 'N/A' and Age > 20
+SELECT * FROM MEMBER 
+WHERE Phone <> 'N/A' AND Age > 20;
+
+-- Members Age NOT between 12 and 17
+SELECT * FROM MEMBER 
+WHERE Age NOT BETWEEN 12 AND 17;
+
+-- Books Title contains 'Data' or 'Database'
+SELECT * FROM BOOK 
+WHERE Title LIKE '%Data%' OR Title LIKE '%Database%';
+
+-- Top 3 Most Expensive Books
+SELECT * FROM BOOK 
+ORDER BY Price DESC 
+LIMIT 3;
+
+-- 2 Cheapest Books
+SELECT * FROM BOOK 
+ORDER BY Price ASC 
+LIMIT 2;
+
+-- Count total records
+SELECT COUNT(*) AS TotalMembers FROM MEMBER;
+SELECT COUNT(*) AS TotalBooks FROM BOOK;
+SELECT COUNT(*) AS TotalBorrows FROM BORROW;
+
+-- Average, Min, Max Price
+SELECT 
+AVG(Price) AS AvgPrice,
+MIN(Price) AS MinPrice,
+MAX(Price) AS MaxPrice
+FROM BOOK;
+
+-- Books count by Availability
+SELECT Availability, COUNT(*) AS TotalBooks
+FROM BOOK
+GROUP BY Availability;
+
+-- Borrow count per Member
+SELECT MemberID, COUNT(*) AS BorrowCount
+FROM BORROW
+GROUP BY MemberID;
