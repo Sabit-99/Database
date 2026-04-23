@@ -1,0 +1,78 @@
+DROP DATABASE IF EXISTS faculty_trigger_lab; 
+CREATE DATABASE faculty_trigger_lab; 
+USE faculty_trigger_lab; 
+CREATE TABLE EMPLOYEE ( 
+    EmpID INT PRIMARY KEY, 
+    EmpName VARCHAR(50) NOT NULL, 
+    BasicSalary DECIMAL(10,2) NOT NULL, 
+    StartDate DATE NOT NULL, 
+    NoOfPub INT NOT NULL CHECK (NoOfPub >= 0), 
+    IncrementRate DECIMAL(5,2) DEFAULT 0, 
+    UpdatedSalary DECIMAL(10,2) 
+); 
+CREATE TABLE SALARY_LOG ( 
+    LogID INT AUTO_INCREMENT PRIMARY KEY, 
+    EmpID INT, 
+    OldSalary DECIMAL(10,2), 
+    NewSalary DECIMAL(10,2), 
+    ChangedAt DATETIME DEFAULT CURRENT_TIMESTAMP, 
+    Note VARCHAR(100), 
+    FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID) 
+); 
+INSERT INTO EMPLOYEE (EmpID, EmpName, BasicSalary, StartDate, NoOfPub) 
+VALUES 
+(1, 'Rahim', 30000, '2022-01-01', 5), 
+(2, 'Karim', 25000, '2023-01-01', 3), 
+(3, 'Salam', 20000, '2024-01-01', 1), 
+(4, 'Jamal', 18000, '2025-01-01', 0), 
+(5, 'Hasan', 35000, '2020-05-01', 6), 
+(6, 'Rafiq', 28000, '2023-07-01', 2), 
+(7, 'Sohan', 22000, '2024-06-01', 0), 
+(8, 'Imran', 26000, '2021-03-01', 1); 
+DELIMITER $$ 
+CREATE TRIGGER trg_salary_update 
+BEFORE UPDATE ON EMPLOYEE 
+FOR EACH ROW 
+BEGIN 
+    DECLARE years INT; 
+    SET years = TIMESTAMPDIFF(YEAR, NEW.StartDate, CURDATE()); 
+    -- Default 
+    SET NEW.IncrementRate = 0; 
+    IF years > 1 THEN 
+        IF NEW.NoOfPub > 4 THEN 
+            SET NEW.IncrementRate = 20; 
+        ELSEIF NEW.NoOfPub IN (2,3) THEN 
+            SET NEW.IncrementRate = 10; 
+        ELSEIF NEW.NoOfPub = 1 THEN 
+            SET NEW.IncrementRate = 5; 
+        ELSE 
+            SET NEW.IncrementRate = 0; 
+        END IF; 
+    END IF; 
+    -- Calculate Updated Salary 
+    SET NEW.UpdatedSalary = NEW.BasicSalary +  
+        (NEW.BasicSalary * NEW.IncrementRate / 100); 
+END$$ 
+DELIMITER ; 
+DELIMITER $$ 
+CREATE TRIGGER trg_salary_log 
+AFTER UPDATE ON EMPLOYEE 
+FOR EACH ROW 
+BEGIN 
+    IF OLD.UpdatedSalary <> NEW.UpdatedSalary THEN 
+        INSERT INTO SALARY_LOG (EmpID, OldSalary, NewSalary, Note) 
+        VALUES ( 
+            NEW.EmpID, 
+            OLD.UpdatedSalary, 
+            NEW.UpdatedSalary, 
+            'Salary updated based on policy' 
+        ); 
+    END IF; 
+END$$ 
+DELIMITER ; 
+UPDATE EMPLOYEE SET NoOfPub = 5 WHERE EmpID = 1;  -- 20% 
+UPDATE EMPLOYEE SET NoOfPub = 3 WHERE EmpID = 2;  -- 10% 
+UPDATE EMPLOYEE SET NoOfPub = 1 WHERE EmpID = 3;  -- 5% 
+UPDATE EMPLOYEE SET NoOfPub = 0 WHERE EmpID = 4;  -- 0% 
+SELECT * FROM EMPLOYEE; 
+SELECT * FROM SALARY_LOG; 
